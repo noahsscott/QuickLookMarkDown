@@ -1,13 +1,13 @@
 //
-//  MarkdownQuickLook2UITestsLaunchTests.swift
-//  MarkdownQuickLook2UITests
+//  QuickLookMarkDownUITestsLaunchTests.swift
+//  QuickLookMarkDownUITests
 //
 //  Created by Noah Scott on 8/1/2026.
 //
 
 import XCTest
 
-final class MarkdownQuickLook2UITestsLaunchTests: XCTestCase {
+final class QuickLookMarkDownUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

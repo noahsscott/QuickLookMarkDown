@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  MarkdownQuickLook2
+//  QuickLookMarkDown
 //
 //  Created by Noah Scott on 8/1/2026.
 //
