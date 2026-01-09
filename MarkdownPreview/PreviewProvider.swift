@@ -39,7 +39,7 @@ class PreviewProvider: QLPreviewProvider, QLPreviewingController {
         
         let reply = QLPreviewReply.init(dataOfContentType: contentType, contentSize: CGSize.init(width: 800, height: 800)) { (replyToUpdate : QLPreviewReply) in
 
-            let data = Data("Hello world".utf8)
+            let data = Data("QuickLookMarkDown Test".utf8)
             
             //setting the stringEncoding for text and html data is optional and defaults to String.Encoding.utf8
             replyToUpdate.stringEncoding = .utf8
