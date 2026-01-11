@@ -1237,6 +1237,506 @@ return He}()
         return nil
     }
 
+    // Emoji shortcode to Unicode mapping
+    // Curated list of ~120 most useful emoji (avoiding complex ZWJ sequences)
+    private let emojiShortcodes: [String: String] = [
+        // Most Popular Reactions & Gestures
+        ":+1:": "👍",
+        ":thumbsup:": "👍",
+        ":-1:": "👎",
+        ":thumbsdown:": "👎",
+        ":heart:": "❤️",
+        ":tada:": "🎉",
+        ":clap:": "👏",
+        ":pray:": "🙏",
+        ":wave:": "👋",
+        ":muscle:": "💪",
+        ":raised_hands:": "🙌",
+        ":v:": "✌️",
+
+        // Developer-Specific (High Priority)
+        ":bug:": "🐛",
+        ":rocket:": "🚀",
+        ":construction:": "🚧",
+        ":wrench:": "🔧",
+        ":hammer:": "🔨",
+        ":gear:": "⚙️",
+        ":fire:": "🔥",
+        ":sparkles:": "✨",
+        ":zap:": "⚡",
+        ":boom:": "💥",
+        ":bulb:": "💡",
+        ":memo:": "📝",
+        ":warning:": "⚠️",
+        ":white_check_mark:": "✅",
+        ":x:": "❌",
+        ":question:": "❓",
+        ":exclamation:": "❗",
+        ":lock:": "🔒",
+        ":unlock:": "🔓",
+        ":key:": "🔑",
+        ":mag:": "🔍",
+        ":link:": "🔗",
+        ":package:": "📦",
+        ":books:": "📚",
+        ":book:": "📖",
+        ":bookmark:": "🔖",
+        ":recycle:": "♻️",
+
+        // Arrows
+        ":arrow_up:": "⬆️",
+        ":arrow_down:": "⬇️",
+        ":arrow_left:": "⬅️",
+        ":arrow_right:": "➡️",
+
+        // Smileys & Emotion - Positive
+        ":smile:": "😄",
+        ":smiley:": "😃",
+        ":grin:": "😁",
+        ":laughing:": "😆",
+        ":satisfied:": "😆",
+        ":joy:": "😂",
+        ":rofl:": "🤣",
+        ":blush:": "😊",
+        ":innocent:": "😇",
+        ":wink:": "😉",
+        ":heart_eyes:": "😍",
+        ":kissing_heart:": "😘",
+        ":sunglasses:": "😎",
+        ":star_struck:": "🤩",
+
+        // Smileys & Emotion - Thinking/Neutral
+        ":thinking:": "🤔",
+        ":face_with_monocle:": "🧐",
+        ":neutral_face:": "😐",
+        ":smirk:": "😏",
+        ":unamused:": "😒",
+        ":roll_eyes:": "🙄",
+
+        // Smileys & Emotion - Negative
+        ":disappointed:": "😞",
+        ":worried:": "😟",
+        ":confused:": "😕",
+        ":cry:": "😢",
+        ":sob:": "😭",
+        ":angry:": "😠",
+        ":rage:": "😡",
+        ":scream:": "😱",
+
+        // Smileys & Emotion - Other
+        ":skull:": "💀",
+        ":poop:": "💩",
+        ":hankey:": "💩",
+        ":shit:": "💩",
+        ":ghost:": "👻",
+        ":robot:": "🤖",
+
+        // Hearts
+        ":sparkling_heart:": "💖",
+        ":heartbeat:": "💓",
+        ":broken_heart:": "💔",
+        ":yellow_heart:": "💛",
+        ":green_heart:": "💚",
+        ":blue_heart:": "💙",
+        ":purple_heart:": "💜",
+
+        // Symbols & Shapes
+        ":star:": "⭐",
+        ":star2:": "🌟",
+        ":100:": "💯",
+        ":trophy:": "🏆",
+        ":crown:": "👑",
+        ":gem:": "💎",
+
+        // Tech & Office Objects
+        ":computer:": "💻",
+        ":keyboard:": "⌨️",
+        ":phone:": "☎️",
+        ":iphone:": "📱",
+        ":email:": "📧",
+        ":envelope:": "✉️",
+        ":bell:": "🔔",
+        ":clipboard:": "📋",
+        ":calendar:": "📅",
+        ":pushpin:": "📌",
+        ":paperclip:": "📎",
+
+        // Nature & Weather
+        ":sunny:": "☀️",
+        ":cloud:": "☁️",
+        ":rainbow:": "🌈",
+        ":snowflake:": "❄️",
+        ":tree:": "🌳",
+        ":seedling:": "🌱",
+        ":rose:": "🌹",
+
+        // Animals
+        ":cat:": "🐱",
+        ":dog:": "🐶",
+        ":rabbit:": "🐰",
+        ":bear:": "🐻",
+        ":panda_face:": "🐼",
+        ":monkey_face:": "🐵",
+        ":bird:": "🐦",
+        ":penguin:": "🐧",
+        ":bee:": "🐝",
+        ":fish:": "🐟",
+
+        // Food & Drink
+        ":coffee:": "☕",
+        ":tea:": "🍵",
+        ":beer:": "🍺",
+        ":beers:": "🍻",
+        ":pizza:": "🍕",
+        ":hamburger:": "🍔",
+        ":fries:": "🍟",
+        ":cake:": "🍰",
+        ":apple:": "🍎",
+        ":banana:": "🍌",
+        ":watermelon:": "🍉",
+        ":strawberry:": "🍓",
+
+        // Activities & Events
+        ":gift:": "🎁",
+        ":balloon:": "🎈",
+        ":confetti_ball:": "🎊",
+
+        // Flags (simple ones only)
+        ":checkered_flag:": "🏁"
+    ]
+
+    /*
+    // FULL DICTIONARY COMMENTED OUT FOR DEBUGGING
+    private let emojiShortcodesFullVersion: [String: String] = [
+        // Most Popular - Reactions & Gestures
+        ":+1:": "👍", ":thumbsup:": "👍",
+        ":-1:": "👎", ":thumbsdown:": "👎",
+        ":heart:": "❤️",
+        ":tada:": "🎉",
+        ":clap:": "👏",
+        ":pray:": "🙏",
+        ":ok_hand:": "👌",
+        ":wave:": "👋",
+        ":raised_hands:": "🙌",
+        ":muscle:": "💪",
+        ":fist:": "✊",
+        ":punch:": "👊",
+        ":v:": "✌️",
+        ":point_left:": "👈",
+        ":point_right:": "👉",
+        ":point_up:": "☝️",
+        ":point_down:": "👇",
+
+        // Developer-Specific (High Priority)
+        ":bug:": "🐛",
+        ":rocket:": "🚀",
+        ":construction:": "🚧",
+        ":wrench:": "🔧",
+        ":hammer:": "🔨",
+        ":gear:": "⚙️",
+        ":fire:": "🔥",
+        ":sparkles:": "✨",
+        ":zap:": "⚡",
+        ":boom:": "💥",
+        ":bulb:": "💡",
+        ":memo:": "📝",
+        ":pencil2:": "✏️",
+        ":warning:": "⚠️",
+        ":white_check_mark:": "✅",
+        ":heavy_check_mark:": "✔️",
+        ":x:": "❌",
+        ":bangbang:": "‼️",
+        ":question:": "❓",
+        ":exclamation:": "❗",
+        ":lock:": "🔒",
+        ":unlock:": "🔓",
+        ":key:": "🔑",
+        ":mag:": "🔍",
+        ":mag_right:": "🔎",
+        ":link:": "🔗",
+        ":package:": "📦",
+        ":books:": "📚",
+        ":book:": "📖",
+        ":bookmark:": "🔖",
+        ":recycle:": "♻️",
+        ":arrow_up:": "⬆️",
+        ":arrow_down:": "⬇️",
+        ":arrow_left:": "⬅️",
+        ":arrow_right:": "➡️",
+        ":repeat:": "🔁",
+        ":arrows_clockwise:": "🔃",
+
+        // Smileys & Emotion - Positive
+        ":smile:": "😄",
+        ":smiley:": "😃",
+        ":grin:": "😁",
+        ":laughing:": "😆", ":satisfied:": "😆",
+        ":sweat_smile:": "😅",
+        ":joy:": "😂",
+        ":rofl:": "🤣",
+        ":blush:": "😊",
+        ":innocent:": "😇",
+        ":wink:": "😉",
+        ":relieved:": "😌",
+        ":heart_eyes:": "😍",
+        ":kissing_heart:": "😘",
+        ":yum:": "😋",
+        ":stuck_out_tongue:": "😛",
+        ":stuck_out_tongue_winking_eye:": "😜",
+        ":sunglasses:": "😎",
+        ":star_struck:": "🤩",
+        ":partying_face:": "🥳",
+
+        // Smileys & Emotion - Neutral/Thinking
+        ":thinking:": "🤔",
+        ":face_with_monocle:": "🧐",
+        ":neutral_face:": "😐",
+        ":expressionless:": "😑",
+        ":no_mouth:": "😶",
+        ":smirk:": "😏",
+        ":unamused:": "😒",
+        ":roll_eyes:": "🙄",
+        ":grimacing:": "😬",
+        ":lying_face:": "🤥",
+        ":shushing_face:": "🤫",
+
+        // Smileys & Emotion - Negative
+        ":disappointed:": "😞",
+        ":worried:": "😟",
+        ":confused:": "😕",
+        ":slightly_frowning_face:": "🙁",
+        ":frowning:": "☹️",
+        ":persevere:": "😣",
+        ":confounded:": "😖",
+        ":tired_face:": "😫",
+        ":weary:": "😩",
+        ":cry:": "😢",
+        ":sob:": "😭",
+        ":triumph:": "😤",
+        ":angry:": "😠",
+        ":rage:": "😡",
+        ":face_with_symbols_over_mouth:": "🤬",
+        ":exploding_head:": "🤯",
+        ":flushed:": "😳",
+        ":scream:": "😱",
+        ":fearful:": "😨",
+        ":cold_sweat:": "😰",
+        ":hushed:": "😯",
+        ":frowning:": "😦",
+        ":anguished:": "😧",
+
+        // Smileys & Emotion - Other
+        ":smiling_imp:": "😈",
+        ":imp:": "👿",
+        ":skull:": "💀",
+        ":hankey:": "💩", ":poop:": "💩", ":shit:": "💩",
+        ":clown_face:": "🤡",
+        ":robot:": "🤖",
+        ":ghost:": "👻",
+        ":alien:": "👽",
+
+        // Hearts & Love
+        ":cupid:": "💘",
+        ":sparkling_heart:": "💖",
+        ":heartpulse:": "💗",
+        ":heartbeat:": "💓",
+        ":revolving_hearts:": "💞",
+        ":two_hearts:": "💕",
+        ":broken_heart:": "💔",
+        ":yellow_heart:": "💛",
+        ":green_heart:": "💚",
+        ":blue_heart:": "💙",
+        ":purple_heart:": "💜",
+        ":orange_heart:": "🧡",
+        ":black_heart:": "🖤",
+        ":white_heart:": "🤍",
+
+        // Symbols & Shapes
+        ":star:": "⭐",
+        ":star2:": "🌟",
+        ":dizzy:": "💫",
+        ":100:": "💯",
+        ":collision:": "💥",
+        ":zzz:": "💤",
+        ":trophy:": "🏆",
+        ":medal:": "🏅",
+        ":crown:": "👑",
+        ":gem:": "💎",
+
+        // Objects - Tech & Office
+        ":computer:": "💻",
+        ":keyboard:": "⌨️",
+        ":desktop_computer:": "🖥️",
+        ":printer:": "🖨️",
+        ":mouse:": "🖱️",
+        ":trackball:": "🖲️",
+        ":joystick:": "🕹️",
+        ":floppy_disk:": "💾",
+        ":cd:": "💿",
+        ":dvd:": "📀",
+        ":phone:": "☎️",
+        ":calling:": "📲",
+        ":iphone:": "📱",
+        ":pager:": "📟",
+        ":fax:": "📠",
+        ":battery:": "🔋",
+        ":electric_plug:": "🔌",
+
+        // Objects - Documents & Communication
+        ":email:": "📧", ":e-mail:": "📧",
+        ":envelope:": "✉️",
+        ":incoming_envelope:": "📨",
+        ":envelope_with_arrow:": "📩",
+        ":mailbox:": "📫",
+        ":postbox:": "📮",
+        ":newspaper:": "📰",
+        ":page_facing_up:": "📄",
+        ":page_with_curl:": "📃",
+        ":scroll:": "📜",
+        ":clipboard:": "📋",
+        ":calendar:": "📅",
+        ":date:": "📆",
+        ":card_index:": "📇",
+        ":chart_with_upwards_trend:": "📈",
+        ":chart_with_downwards_trend:": "📉",
+        ":bar_chart:": "📊",
+        ":pushpin:": "📌",
+        ":round_pushpin:": "📍",
+        ":paperclip:": "📎",
+
+        // Objects - Other
+        ":bell:": "🔔",
+        ":no_bell:": "🔕",
+        ":hourglass:": "⌛",
+        ":hourglass_flowing_sand:": "⏳",
+        ":alarm_clock:": "⏰",
+        ":watch:": "⌚",
+        ":stopwatch:": "⏱️",
+        ":timer_clock:": "⏲️",
+        ":moneybag:": "💰",
+        ":credit_card:": "💳",
+        ":label:": "🏷️",
+
+        // Nature & Animals
+        ":sunny:": "☀️",
+        ":cloud:": "☁️",
+        ":umbrella:": "☂️",
+        ":snowflake:": "❄️",
+        ":snowman:": "⛄",
+        ":comet:": "☄️",
+        ":rainbow:": "🌈",
+        ":tree:": "🌳",
+        ":seedling:": "🌱",
+        ":herb:": "🌿",
+        ":four_leaf_clover:": "🍀",
+        ":rose:": "🌹",
+        ":cat:": "🐱",
+        ":dog:": "🐶",
+        ":mouse:": "🐭",
+        ":hamster:": "🐹",
+        ":rabbit:": "🐰",
+        ":fox:": "🦊",
+        ":bear:": "🐻",
+        ":panda_face:": "🐼",
+        ":monkey_face:": "🐵",
+        ":see_no_evil:": "🙈",
+        ":hear_no_evil:": "🙉",
+        ":speak_no_evil:": "🙊",
+        ":bird:": "🐦",
+        ":penguin:": "🐧",
+        ":bee:": "🐝",
+        ":lady_beetle:": "🐞",
+        ":turtle:": "🐢",
+        ":fish:": "🐟",
+        ":octopus:": "🐙",
+
+        // Food & Drink
+        ":coffee:": "☕",
+        ":tea:": "🍵",
+        ":sake:": "🍶",
+        ":beer:": "🍺",
+        ":beers:": "🍻",
+        ":wine_glass:": "🍷",
+        ":pizza:": "🍕",
+        ":hamburger:": "🍔",
+        ":fries:": "🍟",
+        ":popcorn:": "🍿",
+        ":doughnut:": "🍩",
+        ":cookie:": "🍪",
+        ":birthday:": "🎂",
+        ":cake:": "🍰",
+        ":lollipop:": "🍭",
+        ":apple:": "🍎",
+        ":banana:": "🍌",
+        ":watermelon:": "🍉",
+        ":grapes:": "🍇",
+        ":strawberry:": "🍓",
+        ":peach:": "🍑",
+        ":cherries:": "🍒",
+        ":lemon:": "🍋",
+        ":corn:": "🌽",
+        ":hot_pepper:": "🌶️",
+        ":egg:": "🥚",
+        ":cheese:": "🧀",
+
+        // Travel & Places
+        ":earth_africa:": "🌍",
+        ":earth_americas:": "🌎",
+        ":earth_asia:": "🌏",
+        ":world_map:": "🗺️",
+        ":japan:": "🗾",
+        ":house:": "🏠",
+        ":house_with_garden:": "🏡",
+        ":office:": "🏢",
+        ":hospital:": "🏥",
+        ":bank:": "🏦",
+        ":hotel:": "🏨",
+        ":school:": "🏫",
+        ":church:": "⛪",
+        ":fountain:": "⛲",
+
+        // Activities & Events
+        ":jack_o_lantern:": "🎃",
+        ":christmas_tree:": "🎄",
+        ":gift:": "🎁",
+        ":balloon:": "🎈",
+        ":confetti_ball:": "🎊",
+        ":tanabata_tree:": "🎋",
+        ":bamboo:": "🎍",
+        ":dolls:": "🎎",
+        ":flags:": "🎏",
+        ":sparkler:": "🎇",
+        ":fireworks:": "🎆",
+        ":musical_note:": "🎵",
+        ":notes:": "🎶",
+        ":art:": "🎨",
+        ":basketball:": "🏀",
+        ":soccer:": "⚽",
+        ":baseball:": "⚾",
+        ":football:": "🏈",
+        ":8ball:": "🎱",
+        ":dart:": "🎯",
+
+        // Flags
+        ":checkered_flag:": "🏁",
+        ":triangular_flag_on_post:": "🚩",
+        ":white_flag:": "🏳️"
+        // Note: Complex ZWJ emoji like rainbow_flag and pirate_flag removed due to encoding issues
+    ]
+    */
+
+    /// Replaces emoji shortcodes (e.g., :smile:) with their Unicode emoji characters
+    private func replaceEmojiShortcodes(_ markdown: String) -> String {
+        var result = markdown
+
+        // Replace all shortcodes with their emoji equivalents
+        for (shortcode, emoji) in emojiShortcodes {
+            result = result.replacingOccurrences(of: shortcode, with: emoji)
+        }
+
+        return result
+    }
+
     override func loadView() {
         self.view = NSView()
     }
@@ -1248,8 +1748,11 @@ return He}()
             throw NSError(domain: "MarkdownPreview", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to decode file as UTF-8"])
         }
 
+        // Replace emoji shortcodes before rendering markdown
+        let processedMarkdown = replaceEmojiShortcodes(markdownString)
+
         // Render markdown to HTML
-        let htmlString = try renderMarkdownToHTML(markdownString, baseURL: url.deletingLastPathComponent())
+        let htmlString = try renderMarkdownToHTML(processedMarkdown, baseURL: url.deletingLastPathComponent())
 
         // Create and configure WebView on main thread
         await MainActor.run {
