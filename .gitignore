@@ -1,6 +1,9 @@
 # Personal working files (not for public release)
 dev-notes/
 
+# Backup files
+*.backup
+
 # macOS
 .DS_Store
 .AppleDouble
