@@ -2663,8 +2663,27 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
                 }
             });
 
-            // Initialize Tocbot
-            if (typeof tocbot !== 'undefined') {
+            // Smart TOC generation - determine if document needs TOC
+            const headings = document.querySelectorAll('.js-toc-content h1, .js-toc-content h2, .js-toc-content h3, .js-toc-content h4, .js-toc-content h5, .js-toc-content h6');
+            const contentElement = document.querySelector('.js-toc-content');
+            const contentText = contentElement ? contentElement.innerText : '';
+            const wordCount = contentText.trim().split(/\\s+/).filter(word => word.length > 0).length;
+
+            // Show TOC if:
+            // - 1000+ words AND 3+ headings, OR
+            // - 3000+ words regardless of heading count
+            const shouldShowTOC = (wordCount >= 1000 && headings.length >= 3) || wordCount >= 3000;
+
+            // Hide TOC elements if document doesn't meet threshold
+            if (!shouldShowTOC) {
+                const tocToggle = document.getElementById('toc-toggle');
+                const tocContainer = document.getElementById('toc-container');
+                if (tocToggle) tocToggle.style.display = 'none';
+                if (tocContainer) tocContainer.style.display = 'none';
+            }
+
+            // Initialize Tocbot (only if TOC should be shown)
+            if (shouldShowTOC && typeof tocbot !== 'undefined') {
                 tocbot.init({
                     tocSelector: '.js-toc',
                     contentSelector: '.js-toc-content',
@@ -2678,31 +2697,33 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
                 });
             }
 
-            // TOC Toggle functionality
-            const tocToggle = document.getElementById('toc-toggle');
-            const tocContainer = document.getElementById('toc-container');
+            // TOC Toggle functionality (only if TOC is shown)
+            if (shouldShowTOC) {
+                const tocToggle = document.getElementById('toc-toggle');
+                const tocContainer = document.getElementById('toc-container');
 
-            if (tocToggle && tocContainer) {
-                tocToggle.addEventListener('click', function() {
-                    document.body.classList.toggle('toc-open');
+                if (tocToggle && tocContainer) {
+                    tocToggle.addEventListener('click', function() {
+                        document.body.classList.toggle('toc-open');
 
-                    // Store preference in localStorage
-                    const isOpen = document.body.classList.contains('toc-open');
+                        // Store preference in localStorage
+                        const isOpen = document.body.classList.contains('toc-open');
+                        try {
+                            localStorage.setItem('toc-open', isOpen);
+                        } catch (e) {
+                            // localStorage might not be available in QuickLook sandbox
+                        }
+                    });
+
+                    // Restore previous state from localStorage
                     try {
-                        localStorage.setItem('toc-open', isOpen);
+                        const wasOpen = localStorage.getItem('toc-open') === 'true';
+                        if (wasOpen) {
+                            document.body.classList.add('toc-open');
+                        }
                     } catch (e) {
-                        // localStorage might not be available in QuickLook sandbox
+                        // localStorage might not be available
                     }
-                });
-
-                // Restore previous state from localStorage
-                try {
-                    const wasOpen = localStorage.getItem('toc-open') === 'true';
-                    if (wasOpen) {
-                        document.body.classList.add('toc-open');
-                    }
-                } catch (e) {
-                    // localStorage might not be available
                 }
             }
             </script>
