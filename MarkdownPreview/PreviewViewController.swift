@@ -2061,7 +2061,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
           background-color: var(--background);
           border-right: 1px solid var(--border-color);
           z-index: 100;
-          transition: left 0.3s ease;
+          transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .toc-open .toc-container {
@@ -2082,7 +2082,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s ease;
+          transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), background-color 0.15s ease, border-color 0.15s ease;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -2105,7 +2105,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
           width: 100%;
           height: 2px;
           background-color: var(--text-primary);
-          transition: all 0.3s ease;
+          transition: all 0.2s ease;
         }
 
         .toc-toggle-icon::before {
@@ -2166,7 +2166,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
         .is-collapsible {
           max-height: 1000px;
           overflow: hidden;
-          transition: all 300ms ease-in-out;
+          transition: all 0.3s ease;
         }
 
         .is-collapsed {
@@ -2177,7 +2177,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
           margin-left: 0;
           padding: var(--spacing-md);
           max-width: 900px;
-          transition: margin-left 0.3s ease;
+          transition: margin-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .toc-open .markdown-body {
@@ -2578,7 +2578,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
         <html>
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
             \(css)
         </head>
         <body>
@@ -2703,17 +2703,20 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
                 const tocContainer = document.getElementById('toc-container');
 
                 if (tocToggle && tocContainer) {
-                    tocToggle.addEventListener('click', function() {
+                    tocToggle.addEventListener('click', function(e) {
+                        // Immediately toggle class for instant visual feedback
                         document.body.classList.toggle('toc-open');
 
-                        // Store preference in localStorage
+                        // Defer localStorage to avoid blocking rendering
                         const isOpen = document.body.classList.contains('toc-open');
-                        try {
-                            localStorage.setItem('toc-open', isOpen);
-                        } catch (e) {
-                            // localStorage might not be available in QuickLook sandbox
-                        }
-                    });
+                        setTimeout(function() {
+                            try {
+                                localStorage.setItem('toc-open', isOpen);
+                            } catch (e) {
+                                // localStorage might not be available in QuickLook sandbox
+                            }
+                        }, 0);
+                    }, false);
 
                     // Restore previous state from localStorage
                     try {
