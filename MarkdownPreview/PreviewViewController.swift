@@ -2105,7 +2105,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
         }
 
         .toc-open .toc-toggle {
-          left: 212px;
+          left: 216px; /* Center 32px button on border at 232px: 232 - 16 = 216 */
         }
 
         .js-toc {
@@ -2210,6 +2210,13 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
 
         .toc-open .markdown-body {
           margin-left: 220px;
+        }
+
+        /* Disable transitions during initial page load */
+        .preload .toc-container,
+        .preload .toc-toggle,
+        .preload .markdown-body {
+          transition: none !important;
         }
 
         /* Hide TOC on narrow windows */
@@ -2609,7 +2616,7 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
             <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
             \(css)
         </head>
-        <body>
+        <body class="preload">
             <!-- TOC Toggle Button -->
             <button class="toc-toggle" id="toc-toggle" aria-label="Toggle Table of Contents">
                 <div class="toc-toggle-icon">
@@ -2773,15 +2780,22 @@ KCgpPT57dmFyIGU9ezE2MzplPT57ZS5leHBvcnRzPWZ1bmN0aW9uKGUpe3ZhciB0LG49W10uZm9yRWFj
                         }, 0);
                     }, false);
 
-                    // Restore previous state from localStorage
+                    // Restore previous state from localStorage (only if viewport is wide enough)
+                    // Skip for small Finder preview pane to avoid distracting animations
                     try {
                         const wasOpen = localStorage.getItem('toc-open') === 'true';
-                        if (wasOpen) {
+                        if (wasOpen && window.innerWidth > 700) {
                             document.body.classList.add('toc-open');
                         }
                     } catch (e) {
                         // localStorage might not be available
                     }
+
+                    // Remove preload class to enable transitions for user interactions
+                    // Use requestAnimationFrame to ensure initial state is rendered first
+                    requestAnimationFrame(function() {
+                        document.body.classList.remove('preload');
+                    });
                 }
             }
             </script>
