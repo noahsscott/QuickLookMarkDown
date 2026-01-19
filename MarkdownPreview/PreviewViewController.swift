@@ -14,6 +14,8 @@ class PreviewViewController: NSViewController, QLPreviewingController {
 
     private let markdownService = MarkdownService()
 
+    private var webView: WKWebView?
+
     override var nibName: NSNib.Name? {
         return nil
     }
@@ -37,18 +39,20 @@ class PreviewViewController: NSViewController, QLPreviewingController {
 
         // Create and configure WebView on main thread
         await MainActor.run {
-            let webView = WKWebView()
-            webView.translatesAutoresizingMaskIntoConstraints = false
-
-            self.view.addSubview(webView)
-            NSLayoutConstraint.activate([
-                webView.topAnchor.constraint(equalTo: self.view.topAnchor),
-                webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-                webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-                webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
-            ])
-
-            webView.loadHTMLString(htmlString, baseURL: url.deletingLastPathComponent())
+            if self.webView == nil {
+                let webView = WKWebView()
+                webView.translatesAutoresizingMaskIntoConstraints = false
+                self.view.addSubview(webView)
+                NSLayoutConstraint.activate([
+                    webView.topAnchor.constraint(equalTo: self.view.topAnchor),
+                    webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+                    webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+                    webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+                ])
+                self.webView = webView
+            }
+            
+            self.webView?.loadHTMLString(htmlString, baseURL: url.deletingLastPathComponent())
         }
     }
 }

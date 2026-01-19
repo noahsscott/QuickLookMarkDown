@@ -12,13 +12,34 @@ class MarkdownService {
     
     /// Replaces emoji shortcodes (e.g., :smile:) with their Unicode emoji characters
     func replaceEmojiShortcodes(_ markdown: String) -> String {
-        var result = markdown
-
-        // Replace all shortcodes with their emoji equivalents
-        for (shortcode, emoji) in Resources.emojiShortcodes {
-            result = result.replacingOccurrences(of: shortcode, with: emoji)
+        // Regex to find potential shortcodes: colon, alphanumeric/underscore/plus/minus, colon
+        // Example matches: :smile: :+1: :arrow_up:
+        let pattern = ":[a-zA-Z0-9_+-]+:"
+        
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return markdown
         }
-
+        
+        let range = NSRange(markdown.startIndex..<markdown.endIndex, in: markdown)
+        let matches = regex.matches(in: markdown, range: range)
+        
+        // Return early if no shortcodes found
+        if matches.isEmpty {
+            return markdown
+        }
+        
+        var result = markdown
+        
+        // Iterate matches in reverse order to preserve ranges when replacing
+        for match in matches.reversed() {
+            guard let range = Range(match.range, in: result) else { continue }
+            let shortcode = String(result[range])
+            
+            if let emoji = Resources.emojiShortcodes[shortcode] {
+                result.replaceSubrange(range, with: emoji)
+            }
+        }
+        
         return result
     }
 
