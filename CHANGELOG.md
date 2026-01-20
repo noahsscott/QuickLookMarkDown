@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [v0.6.1] - 2026-01-20
 ### Added
 - MIT License file
 
