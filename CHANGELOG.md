@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Updated `dev-notes/llm-guidelines.md` with versioning and release workflow documentation
 
 ## [v0.6.1] - 2026-01-20
 ### Added
