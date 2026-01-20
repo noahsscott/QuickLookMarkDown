@@ -1,6 +1,8 @@
 # Changelog
 
-## [v0.6.0] - Unreleased
+## [Unreleased]
+
+## [v0.6.0] - 2026-01-20
 ### Resource Architecture Refactor
 - Extracted CSS and JavaScript from inline strings to external bundle files
 - Added `MarkdownPreview/Resources/` directory with `style.css`, `highlight.min.js`, `mermaid.min.js`, `tocbot.min.js`
