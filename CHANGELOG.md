@@ -1,6 +1,20 @@
 # Changelog
 
-## [v0.5.0] - 2026-01-16 - 
+## [v0.6.0] - Unreleased
+### Resource Architecture Refactor
+- Extracted CSS and JavaScript from inline strings to external bundle files
+- Added `MarkdownPreview/Resources/` directory with `style.css`, `highlight.min.js`, `mermaid.min.js`, `tocbot.min.js`
+- Updated `MarkdownService` to load resources from bundle using `baseURL` pattern
+- Cleaned up `Resources.swift` to contain only emoji shortcode dictionary
+- Improved maintainability: syntax highlighting and proper tooling now available for CSS/JS files
+
+## [v0.5.1] - 2026-01-20
+### Fixed
+- Fixed memory leak: `WKWebView` instances now reused instead of recreated on each preview
+- Optimized emoji replacement: O(N×M) loop replaced with O(N) regex-based approach
+- Improved extension stability for rapid file navigation in Finder
+
+## [v0.5.0] - 2026-01-16
 ### Refactor architecture and consolidate documentation
 - Split monolithic PreviewViewController into MarkdownService and Resources
 - Create MarkdownPreview/Resources.swift for static assets (JS/CSS)

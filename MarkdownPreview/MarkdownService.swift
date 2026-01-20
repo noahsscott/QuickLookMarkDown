@@ -43,9 +43,37 @@ class MarkdownService {
         return result
     }
 
-    func renderMarkdownToHTML(_ markdown: String) throws -> String {
+    func renderMarkdownToHTML(_ markdown: String, bundle: Bundle = Bundle.main) throws -> String {
         let down = Down(markdownString: markdown)
         let htmlBody = try down.toHTML(.default)
+
+        // Read CSS and JS resources from bundle
+        guard let cssURL = bundle.url(forResource: "style", withExtension: "css"),
+              let highlightURL = bundle.url(forResource: "highlight.min", withExtension: "js"),
+              let mermaidURL = bundle.url(forResource: "mermaid.min", withExtension: "js"),
+              let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js") else {
+            // Fallback: return unstyled HTML with error message if resources not found
+            return """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"></head>
+            <body>
+                <div style="padding: 20px; background: #fff3cd; border: 1px solid #ffc107; margin: 20px;">
+                    <h3>⚠️ Resource Error</h3>
+                    <p>Unable to find CSS/JS resource files in bundle.</p>
+                    <p>Bundle path: \(bundle.bundlePath)</p>
+                    <p>Resource path: \(bundle.resourcePath ?? "nil")</p>
+                </div>
+                <div style="padding: 20px;">\(htmlBody)</div>
+            </body>
+            </html>
+            """
+        }
+
+        let css = try String(contentsOf: cssURL, encoding: .utf8)
+        let highlightJS = try String(contentsOf: highlightURL, encoding: .utf8)
+        let mermaidJS = try String(contentsOf: mermaidURL, encoding: .utf8)
+        let tocbotJS = try String(contentsOf: tocbotURL, encoding: .utf8)
 
         return """
         <!DOCTYPE html>
@@ -53,7 +81,9 @@ class MarkdownService {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-            \(Resources.css)
+            <style>
+            \(css)
+            </style>
         </head>
         <body class="preload">
             <!-- TOC Toggle Button -->
@@ -76,10 +106,10 @@ class MarkdownService {
             </div>
 
             <script>
-            \(Resources.highlightJS)
+            \(highlightJS)
             </script>
             <script>
-            \(Resources.mermaidJS)
+            \(mermaidJS)
             </script>
             <script>
             // Initialize syntax highlighting
@@ -122,7 +152,7 @@ class MarkdownService {
             })();
             </script>
             <script>
-            \(Resources.tocbotJS)
+            \(tocbotJS)
             </script>
             <script>
             // Generate IDs for headings that don't have them
