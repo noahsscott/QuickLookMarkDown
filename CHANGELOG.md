@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- MIT License file
+
+### Changed
+- Updated README for development use (removed end-user installation instructions, added build & test protocol)
 
 ## [v0.6.0] - 2026-01-20
 ### Resource Architecture Refactor
