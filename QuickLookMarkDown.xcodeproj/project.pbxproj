@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		620446BA2F20814F00AC2D3D /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 620446B92F20814F00AC2D3D /* Down */; };
 		6215B4F62F0FBB240092473D /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6215B4F52F0FBB240092473D /* Quartz.framework */; };
 		6215B5022F0FBB240092473D /* MarkdownPreview.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6215B4F32F0FBB240092473D /* MarkdownPreview.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		6215B50A2F0FBC7B0092473D /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 6215B5092F0FBC7B0092473D /* Down */; };
 		6259D1A82F10C35900DE0F3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6259D1A42F10C35800DE0F3F /* Assets.xcassets */; };
 		6259D1A92F10C35900DE0F3F /* QuickLookMarkDownApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6259D1A62F10C35800DE0F3F /* QuickLookMarkDownApp.swift */; };
 		6259D1AA2F10C35900DE0F3F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6259D1A52F10C35800DE0F3F /* ContentView.swift */; };
@@ -130,7 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6215B50A2F0FBC7B0092473D /* Down in Frameworks */,
+				620446BA2F20814F00AC2D3D /* Down in Frameworks */,
 				6215B4F62F0FBB240092473D /* Quartz.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,7 +266,7 @@
 			);
 			name = MarkdownPreview;
 			packageProductDependencies = (
-				6215B5092F0FBC7B0092473D /* Down */,
+				620446B92F20814F00AC2D3D /* Down */,
 			);
 			productName = MarkdownPreview;
 			productReference = 6215B4F32F0FBB240092473D /* MarkdownPreview.appex */;
@@ -308,7 +308,7 @@
 			mainGroup = 6215B4BC2F0FBAE70092473D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				6215B5082F0FBC7B0092473D /* XCRemoteSwiftPackageReference "Down" */,
+				620446B82F20814F00AC2D3D /* XCRemoteSwiftPackageReference "Down-gfm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6215B4C62F0FBAE70092473D /* Products */;
@@ -831,20 +831,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		6215B5082F0FBC7B0092473D /* XCRemoteSwiftPackageReference "Down" */ = {
+		620446B82F20814F00AC2D3D /* XCRemoteSwiftPackageReference "Down-gfm" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/johnxnguyen/Down";
+			repositoryURL = "https://github.com/stackotter/Down-gfm";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6215B5092F0FBC7B0092473D /* Down */ = {
+		620446B92F20814F00AC2D3D /* Down */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 6215B5082F0FBC7B0092473D /* XCRemoteSwiftPackageReference "Down" */;
+			package = 620446B82F20814F00AC2D3D /* XCRemoteSwiftPackageReference "Down-gfm" */;
 			productName = Down;
 		};
 /* End XCSwiftPackageProductDependency section */

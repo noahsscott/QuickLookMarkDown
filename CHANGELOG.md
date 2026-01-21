@@ -1,7 +1,18 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Math/LaTeX support via Temml library
+  - Inline math with `$...$` delimiters
+  - Display/block math with `$$...$$` delimiters
+  - Native MathML rendering in WebKit (lightweight ~180KB)
+  - Added `temml.min.js`, `Temml-Local.css`, `Temml.woff2` to Resources
+- Test files for math (`math-test.md`) and tables (`table-test.md`)
+
 ### Changed
+- Switched markdown parser from `Down` to `Down-gfm` (cmark-gfm based)
+  - Note: Tables still do not render due to Down-gfm not enabling GFM extensions
+  - Planned migration to marked.js for full GFM support (see dev-notes)
 - Updated `dev-notes/llm-guidelines.md` with versioning and release workflow documentation
 
 ## [v0.6.1] - 2026-01-20

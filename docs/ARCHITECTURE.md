@@ -4,11 +4,14 @@
 - **Type:** macOS App Extension (Quick Look Preview).
 - **Hosting:** Run within a sandboxed `WKWebView` instance.
 - **Security:** Offline-only. Network access blocked by default (though entitlements allow it, we don't use it).
-- **Dependencies:** 
-  - `Down`: Markdown parsing.
+- **Dependencies:**
+  - `Down-gfm`: Markdown parsing (cmark-gfm based, but GFM extensions not enabled - see note below).
   - `highlight.js`: Syntax highlighting (embedded).
   - `Mermaid.js`: Diagram rendering (embedded).
   - `Tocbot`: Table of Contents (embedded).
+  - `Temml`: Math/LaTeX rendering via MathML (embedded).
+
+> **Note on Table Support:** Down-gfm was adopted to enable GFM tables, but the library's Swift wrapper uses `cmark_parse_document()` which bypasses cmark-gfm's extension system. Tables still render as plain text. A migration to marked.js is planned to resolve this.
 
 ## Implementation Decisions
 

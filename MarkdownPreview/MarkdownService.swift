@@ -51,7 +51,9 @@ class MarkdownService {
         guard let cssURL = bundle.url(forResource: "style", withExtension: "css"),
               let highlightURL = bundle.url(forResource: "highlight.min", withExtension: "js"),
               let mermaidURL = bundle.url(forResource: "mermaid.min", withExtension: "js"),
-              let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js") else {
+              let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js"),
+              let temmlCSSURL = bundle.url(forResource: "Temml-Local", withExtension: "css"),
+              let temmlJSURL = bundle.url(forResource: "temml.min", withExtension: "js") else {
             // Fallback: return unstyled HTML with error message if resources not found
             return """
             <!DOCTYPE html>
@@ -74,6 +76,8 @@ class MarkdownService {
         let highlightJS = try String(contentsOf: highlightURL, encoding: .utf8)
         let mermaidJS = try String(contentsOf: mermaidURL, encoding: .utf8)
         let tocbotJS = try String(contentsOf: tocbotURL, encoding: .utf8)
+        let temmlCSS = try String(contentsOf: temmlCSSURL, encoding: .utf8)
+        let temmlJS = try String(contentsOf: temmlJSURL, encoding: .utf8)
 
         return """
         <!DOCTYPE html>
@@ -83,6 +87,9 @@ class MarkdownService {
             <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
             <style>
             \(css)
+            </style>
+            <style>
+            \(temmlCSS)
             </style>
         </head>
         <body class="preload">
@@ -153,6 +160,31 @@ class MarkdownService {
             </script>
             <script>
             \(tocbotJS)
+            </script>
+            <script>
+            \(temmlJS)
+            </script>
+            <script>
+            // Initialize Temml for math rendering
+            if (typeof temml !== 'undefined') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    try {
+                        temml.renderMathInElement(document.body, {
+                            delimiters: [
+                                {left: "$$", right: "$$", display: true},
+                                {left: "$", right: "$", display: false}
+                            ],
+                            throwOnError: false,
+                            ignoredTags: [
+                                "script", "noscript", "style", "textarea", "pre", "code"
+                            ],
+                            ignoredClasses: ["language-*"]
+                        });
+                    } catch (error) {
+                        console.error('Temml rendering error:', error);
+                    }
+                });
+            }
             </script>
             <script>
             // Generate IDs for headings that don't have them
