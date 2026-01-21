@@ -269,12 +269,12 @@ class MarkdownService {
             // - 3000+ words regardless of heading count
             const shouldShowTOC = (wordCount >= 1000 && headings.length >= 3) || wordCount >= 3000;
 
-            // Hide TOC elements if document doesn't meet threshold
-            if (!shouldShowTOC) {
+            // Show TOC elements only if document meets threshold (hidden by default in CSS)
+            if (shouldShowTOC) {
                 const tocToggle = document.getElementById('toc-toggle');
                 const tocContainer = document.getElementById('toc-container');
-                if (tocToggle) tocToggle.style.display = 'none';
-                if (tocContainer) tocContainer.style.display = 'none';
+                if (tocToggle) tocToggle.style.display = 'flex';
+                if (tocContainer) tocContainer.style.display = 'block';
             }
 
             // Initialize Tocbot (only if TOC should be shown)

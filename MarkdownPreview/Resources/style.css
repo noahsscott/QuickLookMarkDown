@@ -252,6 +252,7 @@
           border-right: 1px solid var(--border-color);
           z-index: 100;
           transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+          display: none; /* Hidden by default, shown via JS if document meets TOC threshold */
         }
 
         .toc-open .toc-container {
@@ -269,7 +270,7 @@
           border-radius: 6px;
           cursor: pointer;
           z-index: 101;
-          display: flex;
+          display: none; /* Hidden by default, shown via JS if document meets TOC threshold */
           align-items: center;
           justify-content: center;
           transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), background-color 0.15s ease, border-color 0.15s ease;
@@ -511,13 +512,17 @@
           margin-bottom: var(--spacing-xs);
         }
 
-        /* Task lists */
-        ul.contains-task-list {
+        /* Task lists - support both GitHub-style class and marked.js default output */
+        ul.contains-task-list,
+        ul.task-list,
+        ul:has(> li > input[type="checkbox"]) {
           list-style: none;
           padding-left: 0;
         }
 
-        ul.contains-task-list li {
+        ul.contains-task-list li,
+        ul.task-list li,
+        li:has(> input[type="checkbox"]) {
           padding-left: var(--spacing-lg);
           position: relative;
         }

@@ -1,6 +1,12 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `test-extension.sh` script for simplified deploy/test workflow
+
+### Fixed
+- TOC now hidden by default in CSS, shown via JS only when threshold met (prevents flash on short documents)
+- Task list checkbox styling now works with marked.js output (not just GitHub-style classes)
 
 ## [v0.7.0] - 2026-01-21
 ### Added
