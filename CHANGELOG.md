@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [v0.7.1] - 2026-01-21
 ### Added
 - `test-extension.sh` script for simplified deploy/test workflow
 
