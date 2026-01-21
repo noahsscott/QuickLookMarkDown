@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [v0.7.0] - 2026-01-21
 ### Added
 - Math/LaTeX support via Temml library
   - Inline math with `$...$` delimiters
@@ -8,11 +10,15 @@
   - Native MathML rendering in WebKit (lightweight ~180KB)
   - Added `temml.min.js`, `Temml-Local.css`, `Temml.woff2` to Resources
 - Test files for math (`math-test.md`) and tables (`table-test.md`)
+- **GFM table support** now works correctly with marked.js
 
 ### Changed
-- Switched markdown parser from `Down` to `Down-gfm` (cmark-gfm based)
-  - Note: Tables still do not render due to Down-gfm not enabling GFM extensions
-  - Planned migration to marked.js for full GFM support (see dev-notes)
+- **Migrated markdown parser from Down-gfm to marked.js**
+  - Resolves table rendering issue (Down-gfm didn't enable cmark-gfm extensions)
+  - Client-side JavaScript parsing via marked.js v15.0.12
+  - Full GFM support: tables, strikethrough, task lists, autolinks
+  - Emoji shortcode replacement moved from Swift to JavaScript
+  - Removed Down-gfm Swift package dependency
 - Updated `dev-notes/llm-guidelines.md` with versioning and release workflow documentation
 
 ## [v0.6.1] - 2026-01-20

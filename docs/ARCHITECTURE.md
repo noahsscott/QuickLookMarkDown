@@ -5,13 +5,11 @@
 - **Hosting:** Run within a sandboxed `WKWebView` instance.
 - **Security:** Offline-only. Network access blocked by default (though entitlements allow it, we don't use it).
 - **Dependencies:**
-  - `Down-gfm`: Markdown parsing (cmark-gfm based, but GFM extensions not enabled - see note below).
+  - `marked.js`: Markdown parsing with full GFM support (client-side JavaScript).
   - `highlight.js`: Syntax highlighting (embedded).
   - `Mermaid.js`: Diagram rendering (embedded).
   - `Tocbot`: Table of Contents (embedded).
   - `Temml`: Math/LaTeX rendering via MathML (embedded).
-
-> **Note on Table Support:** Down-gfm was adopted to enable GFM tables, but the library's Swift wrapper uses `cmark_parse_document()` which bypasses cmark-gfm's extension system. Tables still render as plain text. A migration to marked.js is planned to resolve this.
 
 ## Implementation Decisions
 
@@ -26,34 +24,33 @@
 
 **Reference:** [Apple Developer Documentation: QLPreviewingController](https://developer.apple.com/documentation/quicklook/qlpreviewingcontroller)
 
-### 2. Emoji Replacement Algorithm (v0.5.1)
-**Problem:** O(N×M) time complexity where N = text length, M = number of shortcodes (~175).
+### 2. Emoji Replacement Algorithm (v0.5.1 → v0.7.0)
+**Original Problem (v0.5.1):** O(N×M) time complexity where N = text length, M = number of shortcodes.
 
-**Root Cause:** Original implementation iterated through the entire emoji dictionary and called `replacingOccurrences(of:with:)` for every key, scanning the full string each time.
+**Original Solution (Swift):** Regex-based single-pass replacement iterating in reverse to preserve string indices.
 
-**Solution:** Regex-based single-pass replacement:
-1. Compile pattern matching shortcode format: `:[a-z0-9_+-]+:`
-2. Find all matches in input string
-3. Look up each match in the dictionary
-4. Replace only valid matches, iterating in reverse to preserve string indices
+**Current Implementation (v0.7.0+):** Moved to client-side JavaScript as part of marked.js migration:
+1. Regex pattern `/:[a-zA-Z0-9_+-]+:/g` matches all shortcodes in one pass
+2. Replace callback looks up each match in dictionary object
+3. O(N) time complexity with hash table lookups
 
-**Result:** O(N) time complexity - single pass through the text.
+**Benefit:** Unified processing pipeline - emoji replacement happens before markdown parsing, both in JavaScript.
 
 ### 3. External Resource Loading (v0.6.0)
 **Problem:** CSS and JavaScript stored as multi-thousand-line string literals in Swift, preventing proper syntax highlighting, linting, and maintainability.
 
 **Solution:** Extract to external files in `MarkdownPreview/Resources/`:
 - `style.css` - All styling including light/dark mode
+- `marked.min.js` - Markdown parsing (GFM)
 - `highlight.min.js` - Syntax highlighting library
 - `mermaid.min.js` - Diagram rendering
 - `tocbot.min.js` - Table of Contents generation
+- `temml.min.js`, `Temml-Local.css`, `Temml.woff2` - Math/LaTeX rendering
 
 **Loading Pattern:**
-- Generate HTML with `<link>` and `<script>` tags referencing filenames
-- Pass `Bundle.main.resourceURL` as `baseURL` when loading HTML into WKWebView
-- WebKit resolves relative paths against the bundle URL
-
-**Reference:** [WKWebView loadHTMLString(_:baseURL:)](https://developer.apple.com/documentation/webkit/wkwebview/1415004-loadhtmlstring)
+- Read resource files from bundle at runtime using `Bundle.url(forResource:withExtension:)`
+- Embed CSS and JavaScript directly in HTML template via `<style>` and `<script>` tags
+- Self-contained HTML string loaded into WKWebView (no external file references)
 
 ## Technical Limitations & Research
 
@@ -99,9 +96,9 @@ The `QuickLookMarkDownTests/` and `QuickLookMarkDownUITests/` folders contain Xc
 
 ### Unit Tests: Potentially Useful
 **What could be tested:**
-- `MarkdownService.replaceEmojiShortcodes()` - Verify emoji replacement logic
+- `MarkdownService.renderMarkdownToHTML()` - Verify HTML template generation
 - HTML generation output - Validate structure, script/style inclusion
-- Edge cases - Empty files, malformed markdown, special characters
+- Edge cases - Empty files, special characters, JSON escaping
 
 **Limitation:** Testing the full rendering pipeline (WKWebView output) is difficult since it requires WebKit, which isn't easily unit-testable.
 

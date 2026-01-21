@@ -1,5 +1,6 @@
 # Personal working files (not for public release)
 dev-notes/
+.claude
 
 # Backup files
 *.backup

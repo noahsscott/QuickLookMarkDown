@@ -6,49 +6,18 @@
 //
 
 import Foundation
-import Down
 
 class MarkdownService {
-    
-    /// Replaces emoji shortcodes (e.g., :smile:) with their Unicode emoji characters
-    func replaceEmojiShortcodes(_ markdown: String) -> String {
-        // Regex to find potential shortcodes: colon, alphanumeric/underscore/plus/minus, colon
-        // Example matches: :smile: :+1: :arrow_up:
-        let pattern = ":[a-zA-Z0-9_+-]+:"
-        
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            return markdown
-        }
-        
-        let range = NSRange(markdown.startIndex..<markdown.endIndex, in: markdown)
-        let matches = regex.matches(in: markdown, range: range)
-        
-        // Return early if no shortcodes found
-        if matches.isEmpty {
-            return markdown
-        }
-        
-        var result = markdown
-        
-        // Iterate matches in reverse order to preserve ranges when replacing
-        for match in matches.reversed() {
-            guard let range = Range(match.range, in: result) else { continue }
-            let shortcode = String(result[range])
-            
-            if let emoji = Resources.emojiShortcodes[shortcode] {
-                result.replaceSubrange(range, with: emoji)
-            }
-        }
-        
-        return result
-    }
 
     func renderMarkdownToHTML(_ markdown: String, bundle: Bundle = Bundle.main) throws -> String {
-        let down = Down(markdownString: markdown)
-        let htmlBody = try down.toHTML(.default)
+        // Escape markdown for safe embedding in JavaScript
+        // Using JSON encoding ensures proper escaping of quotes, newlines, backslashes, etc.
+        let jsonData = try JSONEncoder().encode(markdown)
+        let escapedMarkdown = String(data: jsonData, encoding: .utf8) ?? "\"\""
 
         // Read CSS and JS resources from bundle
         guard let cssURL = bundle.url(forResource: "style", withExtension: "css"),
+              let markedURL = bundle.url(forResource: "marked.min", withExtension: "js"),
               let highlightURL = bundle.url(forResource: "highlight.min", withExtension: "js"),
               let mermaidURL = bundle.url(forResource: "mermaid.min", withExtension: "js"),
               let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js"),
@@ -61,18 +30,19 @@ class MarkdownService {
             <head><meta charset="UTF-8"></head>
             <body>
                 <div style="padding: 20px; background: #fff3cd; border: 1px solid #ffc107; margin: 20px;">
-                    <h3>⚠️ Resource Error</h3>
+                    <h3>Resource Error</h3>
                     <p>Unable to find CSS/JS resource files in bundle.</p>
                     <p>Bundle path: \(bundle.bundlePath)</p>
                     <p>Resource path: \(bundle.resourcePath ?? "nil")</p>
                 </div>
-                <div style="padding: 20px;">\(htmlBody)</div>
+                <pre style="padding: 20px;">\(markdown)</pre>
             </body>
             </html>
             """
         }
 
         let css = try String(contentsOf: cssURL, encoding: .utf8)
+        let markedJS = try String(contentsOf: markedURL, encoding: .utf8)
         let highlightJS = try String(contentsOf: highlightURL, encoding: .utf8)
         let mermaidJS = try String(contentsOf: mermaidURL, encoding: .utf8)
         let tocbotJS = try String(contentsOf: tocbotURL, encoding: .utf8)
@@ -108,10 +78,11 @@ class MarkdownService {
             </div>
 
             <!-- Main Content -->
-            <div class="markdown-body js-toc-content">
-                \(htmlBody)
-            </div>
+            <div class="markdown-body js-toc-content" id="content"></div>
 
+            <script>
+            \(markedJS)
+            </script>
             <script>
             \(highlightJS)
             </script>
@@ -119,6 +90,80 @@ class MarkdownService {
             \(mermaidJS)
             </script>
             <script>
+            // Emoji shortcode dictionary
+            const emojiShortcodes = {
+                // Most Popular Reactions & Gestures
+                ":+1:": "👍", ":thumbsup:": "👍", ":-1:": "👎", ":thumbsdown:": "👎",
+                ":heart:": "❤️", ":tada:": "🎉", ":clap:": "👏", ":pray:": "🙏",
+                ":wave:": "👋", ":muscle:": "💪", ":raised_hands:": "🙌", ":v:": "✌️",
+                // Developer-Specific
+                ":bug:": "🐛", ":rocket:": "🚀", ":construction:": "🚧", ":wrench:": "🔧",
+                ":hammer:": "🔨", ":gear:": "⚙️", ":fire:": "🔥", ":sparkles:": "✨",
+                ":zap:": "⚡", ":boom:": "💥", ":bulb:": "💡", ":memo:": "📝",
+                ":warning:": "⚠️", ":white_check_mark:": "✅", ":x:": "❌",
+                ":question:": "❓", ":exclamation:": "❗", ":lock:": "🔒", ":unlock:": "🔓",
+                ":key:": "🔑", ":mag:": "🔍", ":link:": "🔗", ":package:": "📦",
+                ":books:": "📚", ":book:": "📖", ":bookmark:": "🔖", ":recycle:": "♻️",
+                // Arrows
+                ":arrow_up:": "⬆️", ":arrow_down:": "⬇️", ":arrow_left:": "⬅️", ":arrow_right:": "➡️",
+                // Smileys - Positive
+                ":smile:": "😄", ":smiley:": "😃", ":grin:": "😁", ":laughing:": "😆",
+                ":satisfied:": "😆", ":joy:": "😂", ":rofl:": "🤣", ":blush:": "😊",
+                ":innocent:": "😇", ":wink:": "😉", ":heart_eyes:": "😍", ":kissing_heart:": "😘",
+                ":sunglasses:": "😎", ":star_struck:": "🤩",
+                // Smileys - Thinking/Neutral
+                ":thinking:": "🤔", ":face_with_monocle:": "🧐", ":neutral_face:": "😐",
+                ":smirk:": "😏", ":unamused:": "😒", ":roll_eyes:": "🙄",
+                // Smileys - Negative
+                ":disappointed:": "😞", ":worried:": "😟", ":confused:": "😕", ":cry:": "😢",
+                ":sob:": "😭", ":angry:": "😠", ":rage:": "😡", ":scream:": "😱",
+                // Smileys - Other
+                ":skull:": "💀", ":poop:": "💩", ":hankey:": "💩", ":shit:": "💩",
+                ":ghost:": "👻", ":robot:": "🤖",
+                // Hearts
+                ":sparkling_heart:": "💖", ":heartbeat:": "💓", ":broken_heart:": "💔",
+                ":yellow_heart:": "💛", ":green_heart:": "💚", ":blue_heart:": "💙", ":purple_heart:": "💜",
+                // Symbols & Shapes
+                ":star:": "⭐", ":star2:": "🌟", ":100:": "💯", ":trophy:": "🏆",
+                ":crown:": "👑", ":gem:": "💎",
+                // Tech & Office
+                ":computer:": "💻", ":keyboard:": "⌨️", ":phone:": "☎️", ":iphone:": "📱",
+                ":email:": "📧", ":envelope:": "✉️", ":bell:": "🔔", ":clipboard:": "📋",
+                ":calendar:": "📅", ":pushpin:": "📌", ":paperclip:": "📎",
+                // Nature & Weather
+                ":sunny:": "☀️", ":cloud:": "☁️", ":rainbow:": "🌈", ":snowflake:": "❄️",
+                ":tree:": "🌳", ":seedling:": "🌱", ":rose:": "🌹",
+                // Animals
+                ":cat:": "🐱", ":dog:": "🐶", ":rabbit:": "🐰", ":bear:": "🐻",
+                ":panda_face:": "🐼", ":monkey_face:": "🐵", ":bird:": "🐦", ":penguin:": "🐧",
+                ":bee:": "🐝", ":fish:": "🐟",
+                // Food & Drink
+                ":coffee:": "☕", ":tea:": "🍵", ":beer:": "🍺", ":beers:": "🍻",
+                ":pizza:": "🍕", ":hamburger:": "🍔", ":fries:": "🍟", ":cake:": "🍰",
+                ":apple:": "🍎", ":banana:": "🍌", ":watermelon:": "🍉", ":strawberry:": "🍓",
+                // Activities & Events
+                ":gift:": "🎁", ":balloon:": "🎈", ":confetti_ball:": "🎊",
+                // Flags
+                ":checkered_flag:": "🏁"
+            };
+
+            // Replace emoji shortcodes in text
+            function replaceEmoji(text) {
+                return text.replace(/:[a-zA-Z0-9_+-]+:/g, function(match) {
+                    return emojiShortcodes[match] || match;
+                });
+            }
+
+            // Raw markdown from Swift (JSON-encoded for safety)
+            const rawMarkdown = \(escapedMarkdown);
+
+            // Process: emoji replacement -> markdown parsing -> HTML
+            const markdownWithEmoji = replaceEmoji(rawMarkdown);
+            const htmlContent = marked.parse(markdownWithEmoji);
+
+            // Insert into content container
+            document.getElementById('content').innerHTML = htmlContent;
+
             // Initialize syntax highlighting
             hljs.highlightAll();
 

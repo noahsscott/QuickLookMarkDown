@@ -8,7 +8,6 @@
 import Cocoa
 import Quartz
 import WebKit
-import Down
 
 class PreviewViewController: NSViewController, QLPreviewingController {
 
@@ -31,13 +30,11 @@ class PreviewViewController: NSViewController, QLPreviewingController {
             throw NSError(domain: "MarkdownPreview", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to decode file as UTF-8"])
         }
 
-        // Replace emoji shortcodes before rendering markdown
-        let processedMarkdown = markdownService.replaceEmojiShortcodes(markdownString)
-
         // Render markdown to HTML with resources from bundle
+        // Note: Emoji shortcode replacement and markdown parsing now handled client-side by marked.js
         let htmlString: String
         do {
-            htmlString = try markdownService.renderMarkdownToHTML(processedMarkdown, bundle: Bundle(for: PreviewViewController.self))
+            htmlString = try markdownService.renderMarkdownToHTML(markdownString, bundle: Bundle(for: PreviewViewController.self))
         } catch {
             // If rendering fails, show an error page with the error details
             htmlString = """
