@@ -15,11 +15,13 @@ class MarkdownService {
         let jsonData = try JSONEncoder().encode(markdown)
         let escapedMarkdown = String(data: jsonData, encoding: .utf8) ?? "\"\""
 
+        // Detect if document contains Mermaid diagrams (lazy load 2.6MB library only when needed)
+        let hasMermaid = markdown.contains("```mermaid")
+
         // Read CSS and JS resources from bundle
         guard let cssURL = bundle.url(forResource: "style", withExtension: "css"),
               let markedURL = bundle.url(forResource: "marked.min", withExtension: "js"),
               let highlightURL = bundle.url(forResource: "highlight.min", withExtension: "js"),
-              let mermaidURL = bundle.url(forResource: "mermaid.min", withExtension: "js"),
               let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js"),
               let temmlCSSURL = bundle.url(forResource: "Temml-Local", withExtension: "css"),
               let temmlJSURL = bundle.url(forResource: "temml.min", withExtension: "js") else {
@@ -44,10 +46,45 @@ class MarkdownService {
         let css = try String(contentsOf: cssURL, encoding: .utf8)
         let markedJS = try String(contentsOf: markedURL, encoding: .utf8)
         let highlightJS = try String(contentsOf: highlightURL, encoding: .utf8)
-        let mermaidJS = try String(contentsOf: mermaidURL, encoding: .utf8)
         let tocbotJS = try String(contentsOf: tocbotURL, encoding: .utf8)
         let temmlCSS = try String(contentsOf: temmlCSSURL, encoding: .utf8)
         let temmlJS = try String(contentsOf: temmlJSURL, encoding: .utf8)
+
+        // Load Mermaid only if document contains diagrams (2.6MB library)
+        var mermaidScript = ""
+        var mermaidInit = ""
+        if hasMermaid, let mermaidURL = bundle.url(forResource: "mermaid.min", withExtension: "js") {
+            let mermaidJS = try String(contentsOf: mermaidURL, encoding: .utf8)
+            mermaidScript = "<script>\(mermaidJS)</script>"
+            mermaidInit = """
+
+            // Initialize Mermaid
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'base',
+                securityLevel: 'loose'
+            });
+
+            // Convert markdown code blocks to Mermaid diagrams and render
+            (async function() {
+                const mermaidBlocks = document.querySelectorAll('code.language-mermaid');
+                for (let index = 0; index < mermaidBlocks.length; index++) {
+                    const codeBlock = mermaidBlocks[index];
+                    const mermaidCode = codeBlock.textContent;
+                    const mermaidDiv = document.createElement('div');
+                    mermaidDiv.className = 'mermaid';
+                    mermaidDiv.textContent = mermaidCode;
+                    const preBlock = codeBlock.parentElement;
+                    preBlock.parentElement.replaceChild(mermaidDiv, preBlock);
+                }
+                try {
+                    await mermaid.run();
+                } catch (error) {
+                    console.error('Mermaid rendering error:', error);
+                }
+            })();
+"""
+        }
 
         return """
         <!DOCTYPE html>
@@ -86,9 +123,7 @@ class MarkdownService {
             <script>
             \(highlightJS)
             </script>
-            <script>
-            \(mermaidJS)
-            </script>
+        \(mermaidScript)
             <script>
             // Emoji shortcode dictionary
             const emojiShortcodes = {
@@ -166,42 +201,7 @@ class MarkdownService {
 
             // Initialize syntax highlighting
             hljs.highlightAll();
-
-            // Initialize Mermaid
-            mermaid.initialize({
-                startOnLoad: false,
-                theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'base',
-                securityLevel: 'loose'
-            });
-
-            // Convert markdown code blocks to Mermaid diagrams and render
-            (async function() {
-                // Find all code blocks marked with language-mermaid
-                const mermaidBlocks = document.querySelectorAll('code.language-mermaid');
-
-                for (let index = 0; index < mermaidBlocks.length; index++) {
-                    const codeBlock = mermaidBlocks[index];
-
-                    // Get the mermaid diagram text content
-                    const mermaidCode = codeBlock.textContent;
-
-                    // Create a new div element for Mermaid
-                    const mermaidDiv = document.createElement('div');
-                    mermaidDiv.className = 'mermaid';
-                    mermaidDiv.textContent = mermaidCode;
-
-                    // Replace the pre>code block with the mermaid div
-                    const preBlock = codeBlock.parentElement;
-                    preBlock.parentElement.replaceChild(mermaidDiv, preBlock);
-                }
-
-                // Run Mermaid to render all diagrams
-                try {
-                    await mermaid.run();
-                } catch (error) {
-                    console.error('Mermaid rendering error:', error);
-                }
-            })();
+        \(mermaidInit)
             </script>
             <script>
             \(tocbotJS)
