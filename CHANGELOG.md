@@ -1,6 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- YAML front matter display - metadata at top of markdown files shown in styled box
+  - Parses `---` delimited YAML at document start
+  - Displays key-value pairs in Apple-styled metadata box
+  - Supports inline arrays `[a, b, c]`
+  - Does not affect TOC (uses div elements, not headings)
+
 ### Changed
 - Enhanced `test-extension.sh` to accept optional file argument and `--list` flag
 - Mermaid.js now loads conditionally - 2.6MB library only included when document contains diagrams (89% JS reduction for non-diagram files)
