@@ -468,6 +468,48 @@
           color: var(--syntax-constant);
         }
 
+        /* Front matter metadata box */
+        .frontmatter-box {
+          margin-bottom: var(--spacing-xl);
+          padding: var(--spacing-md);
+          background-color: var(--background-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-sm);
+        }
+
+        .frontmatter-title {
+          font-size: var(--font-size-xs);
+          font-weight: 600;
+          color: var(--text-tertiary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: var(--spacing-sm);
+          padding-bottom: var(--spacing-xs);
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .frontmatter-row {
+          display: flex;
+          padding: var(--spacing-xs) 0;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .frontmatter-row:last-child {
+          border-bottom: none;
+        }
+
+        .frontmatter-key {
+          flex: 0 0 100px;
+          font-weight: 500;
+          color: var(--text-secondary);
+        }
+
+        .frontmatter-value {
+          flex: 1;
+          color: var(--text-primary);
+        }
+
         /* Blockquotes */
         blockquote {
           margin: var(--spacing-lg) 0;

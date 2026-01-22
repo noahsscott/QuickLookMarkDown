@@ -189,15 +189,63 @@ class MarkdownService {
                 });
             }
 
+            // Extract YAML front matter from markdown
+            function extractFrontMatter(markdown) {
+                const match = markdown.match(/^---\\n([\\s\\S]*?)\\n---\\n([\\s\\S]*)$/);
+                if (match) {
+                    return { yaml: match[1], content: match[2] };
+                }
+                return { yaml: null, content: markdown };
+            }
+
+            // Parse simple YAML (key: value pairs, inline arrays)
+            function parseYaml(yamlString) {
+                const result = {};
+                const lines = yamlString.split('\\n');
+                for (const line of lines) {
+                    const match = line.match(/^([\\w-]+):\\s*(.*)$/);
+                    if (match) {
+                        const key = match[1];
+                        let value = match[2].trim();
+                        // Handle inline arrays [a, b, c]
+                        if (value.startsWith('[') && value.endsWith(']')) {
+                            value = value.slice(1, -1).split(',').map(s => s.trim());
+                        }
+                        result[key] = value;
+                    }
+                }
+                return result;
+            }
+
+            // Render front matter as styled metadata box
+            function renderFrontMatter(metadata) {
+                if (!metadata || Object.keys(metadata).length === 0) return '';
+                let html = '<div class="frontmatter-box">';
+                html += '<div class="frontmatter-title">Front Matter</div>';
+                for (const [key, value] of Object.entries(metadata)) {
+                    const displayValue = Array.isArray(value) ? value.join(', ') : value;
+                    html += '<div class="frontmatter-row">';
+                    html += '<span class="frontmatter-key">' + key + '</span>';
+                    html += '<span class="frontmatter-value">' + displayValue + '</span>';
+                    html += '</div>';
+                }
+                html += '</div>';
+                return html;
+            }
+
             // Raw markdown from Swift (JSON-encoded for safety)
             const rawMarkdown = \(escapedMarkdown);
 
+            // Extract front matter before processing
+            const { yaml: yamlString, content: markdownContent } = extractFrontMatter(rawMarkdown);
+            const frontMatterHtml = yamlString ? renderFrontMatter(parseYaml(yamlString)) : '';
+
             // Process: emoji replacement -> markdown parsing -> HTML
-            const markdownWithEmoji = replaceEmoji(rawMarkdown);
+            const markdownWithEmoji = replaceEmoji(markdownContent);
             const htmlContent = marked.parse(markdownWithEmoji);
 
-            // Insert into content container
-            document.getElementById('content').innerHTML = htmlContent;
+            // Insert front matter + content into container
+            document.getElementById('content').innerHTML = frontMatterHtml + htmlContent;
 
             // Initialize syntax highlighting
             hljs.highlightAll();
