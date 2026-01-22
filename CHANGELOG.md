@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Enhanced `test-extension.sh` to accept optional file argument and `--list` flag
+
+### Removed
+- Deleted unused `Resources.swift` (177 lines) - emoji dictionary was superseded by JavaScript implementation in v0.7.0
 
 ## [v0.7.1] - 2026-01-21
 ### Added
