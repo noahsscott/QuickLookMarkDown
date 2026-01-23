@@ -90,6 +90,24 @@
 - **Sandbox:** `NSWorkspace.shared.open()` is blocked. The extension cannot launch other applications.
 - **Native Alternative:** macOS provides a native "Open with [Default App]" button in the Quick Look UI.
 
+### 6. Parked Feature: Font Size Controls
+**Status:** Parked - keyboard shortcuts not feasible, UI buttons possible but deferred.
+
+**Investigation Findings:**
+- **Keyboard Focus:** QuickLook does not give keyboard focus to embedded WKWebView. Even clicking inside the preview does not transfer focus. All keyboard input goes to the QuickLook window frame, resulting in the system "sosumi" error sound.
+- **JavaScript Listeners:** Standard `keydown` event listeners in the WebView work correctly when focused, but focus cannot be obtained in the QuickLook context.
+- **Responder Chain:** The `QLPreviewingController` is not part of the macOS responder chain. Apple explicitly discourages manually injecting it.
+
+**Future Implementation Options:**
+1. **On-screen +/- buttons** - Most reliable approach, same pattern as TOC toggle. Would add small buttons to corner of preview.
+2. **Mouse wheel + Cmd gesture** - Cmd+scroll to zoom. Gesture events may work where keyboard events don't.
+3. **Host app settings UI** - Set font scale once in host app preferences, persisted via UserDefaults + App Groups. Requires entitlement configuration.
+
+**Technical Notes (for future implementation):**
+- CSS already uses custom properties (`--font-size-base`, etc.) - easy to scale via JavaScript
+- localStorage works in QuickLook sandbox (confirmed by TOC state persistence)
+- Scale range 70%-160% with 10% steps recommended
+
 ## Testing Considerations
 
 ### Test Folder Status
