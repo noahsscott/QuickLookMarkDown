@@ -3,11 +3,12 @@
 ## Core Architecture
 - **Type:** macOS App Extension (Quick Look Preview).
 - **Hosting:** Run within a sandboxed `WKWebView` instance.
-- **Security:** Offline-only. Network access blocked by default (though entitlements allow it, we don't use it).
+- **Security:** Offline-only. The `com.apple.security.network.client` entitlement is required by WKWebView (Apple limitation, FB6993802) but no network requests are made. HTML output is sanitised via DOMPurify.
 - **Dependencies:**
   - `marked.js`: Markdown parsing with full GFM support (client-side JavaScript).
   - `highlight.js`: Syntax highlighting (embedded).
-  - `Mermaid.js`: Diagram rendering (embedded).
+  - `DOMPurify`: HTML sanitisation of rendered markdown output (embedded).
+  - `Mermaid.js`: Diagram rendering (embedded, conditionally loaded).
   - `Tocbot`: Table of Contents (embedded).
   - `Temml`: Math/LaTeX rendering via MathML (embedded).
 
@@ -43,14 +44,30 @@
 - `style.css` - All styling including light/dark mode
 - `marked.min.js` - Markdown parsing (GFM)
 - `highlight.min.js` - Syntax highlighting library
-- `mermaid.min.js` - Diagram rendering
+- `purify.min.js` - DOMPurify HTML sanitisation
+- `mermaid.min.js` - Diagram rendering (conditionally loaded)
 - `tocbot.min.js` - Table of Contents generation
 - `temml.min.js`, `Temml-Local.css`, `Temml.woff2` - Math/LaTeX rendering
 
 **Loading Pattern:**
 - Read resource files from bundle at runtime using `Bundle.url(forResource:withExtension:)`
+- Resources cached in memory after first load (`CachedResources` struct) — eliminates redundant disk reads when QuickLook reuses the controller instance
 - Embed CSS and JavaScript directly in HTML template via `<style>` and `<script>` tags
 - Self-contained HTML string loaded into WKWebView (no external file references)
+
+### 4. Security Hardening (Pre-Publication Audit)
+**Context:** Pre-publication review identified several XSS vectors and configuration issues.
+
+**Changes Made:**
+1. **Front matter rendering** — Replaced HTML string concatenation with DOM API (`textContent`). User-controlled YAML values are never interpreted as HTML.
+2. **Error fallback pages** — Added `String.escapedForHTML` extension in Swift. Raw markdown content is HTML-escaped before embedding in error pages.
+3. **marked.js output sanitisation** — `marked.parse()` output wrapped with `DOMPurify.sanitize()`. marked.js intentionally does not sanitise (by design); DOMPurify provides defense-in-depth.
+4. **Mermaid securityLevel** — Changed from `'loose'` to `'strict'` (default since Mermaid v8.2). Only disables click callbacks, which are not used in documentation markdown.
+5. **UTI scope** — Removed `public.plain-text` from `QLSupportedContentTypes`. Extension now only claims markdown-specific UTIs to avoid hijacking previews for all text files.
+
+**Rationale:** Even though the WKWebView runs in a sandbox, the required `com.apple.security.network.client` entitlement means malicious JavaScript could exfiltrate previewed file contents. Defense-in-depth is the standard approach (OWASP).
+
+**Network Entitlement Note:** `com.apple.security.network.client` cannot be removed — WKWebView requires it even for `loadHTMLString` with self-contained HTML due to its out-of-process architecture (Apple bug FB6993802).
 
 ## Technical Limitations & Research
 
