@@ -838,4 +838,13 @@
           th, td {
             padding: var(--spacing-xs) var(--spacing-sm);
           }
+
+          .frontmatter-row {
+            flex-direction: column;
+          }
+
+          .frontmatter-key {
+            flex: none;
+            margin-bottom: 2px;
+          }
         }

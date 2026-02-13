@@ -18,6 +18,7 @@
 ### Fixed
 - Task list checkboxes no longer detach to top-left corner in narrow Finder preview pane — replaced absolute positioning with inline flow
 - Front matter values no longer overflow box boundary at narrow widths — added word-break and min-width fix
+- Front matter rows stack vertically (key above value) in narrow Finder preview pane for better readability
 
 ### Changed
 - Enhanced `test-extension.sh` to accept optional file argument and `--list` flag
