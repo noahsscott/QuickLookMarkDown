@@ -7,6 +7,15 @@
 
 import Foundation
 
+extension String {
+    var escapedForHTML: String {
+        self.replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+    }
+}
+
 class MarkdownService {
 
     func renderMarkdownToHTML(_ markdown: String, bundle: Bundle = Bundle.main) throws -> String {
@@ -22,6 +31,7 @@ class MarkdownService {
         guard let cssURL = bundle.url(forResource: "style", withExtension: "css"),
               let markedURL = bundle.url(forResource: "marked.min", withExtension: "js"),
               let highlightURL = bundle.url(forResource: "highlight.min", withExtension: "js"),
+              let purifyURL = bundle.url(forResource: "purify.min", withExtension: "js"),
               let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js"),
               let temmlCSSURL = bundle.url(forResource: "Temml-Local", withExtension: "css"),
               let temmlJSURL = bundle.url(forResource: "temml.min", withExtension: "js") else {
@@ -37,7 +47,7 @@ class MarkdownService {
                     <p>Bundle path: \(bundle.bundlePath)</p>
                     <p>Resource path: \(bundle.resourcePath ?? "nil")</p>
                 </div>
-                <pre style="padding: 20px;">\(markdown)</pre>
+                <pre style="padding: 20px;">\(markdown.escapedForHTML)</pre>
             </body>
             </html>
             """
@@ -46,6 +56,7 @@ class MarkdownService {
         let css = try String(contentsOf: cssURL, encoding: .utf8)
         let markedJS = try String(contentsOf: markedURL, encoding: .utf8)
         let highlightJS = try String(contentsOf: highlightURL, encoding: .utf8)
+        let purifyJS = try String(contentsOf: purifyURL, encoding: .utf8)
         let tocbotJS = try String(contentsOf: tocbotURL, encoding: .utf8)
         let temmlCSS = try String(contentsOf: temmlCSSURL, encoding: .utf8)
         let temmlJS = try String(contentsOf: temmlJSURL, encoding: .utf8)
@@ -62,7 +73,7 @@ class MarkdownService {
             mermaid.initialize({
                 startOnLoad: false,
                 theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'base',
-                securityLevel: 'loose'
+                securityLevel: 'strict'
             });
 
             // Convert markdown code blocks to Mermaid diagrams and render
@@ -122,6 +133,9 @@ class MarkdownService {
             </script>
             <script>
             \(highlightJS)
+            </script>
+            <script>
+            \(purifyJS)
             </script>
         \(mermaidScript)
             <script>
@@ -217,20 +231,29 @@ class MarkdownService {
                 return result;
             }
 
-            // Render front matter as styled metadata box
+            // Render front matter as styled metadata box (uses DOM API for XSS safety)
             function renderFrontMatter(metadata) {
-                if (!metadata || Object.keys(metadata).length === 0) return '';
-                let html = '<div class="frontmatter-box">';
-                html += '<div class="frontmatter-title">Front Matter</div>';
+                if (!metadata || Object.keys(metadata).length === 0) return null;
+                const box = document.createElement('div');
+                box.className = 'frontmatter-box';
+                const title = document.createElement('div');
+                title.className = 'frontmatter-title';
+                title.textContent = 'Front Matter';
+                box.appendChild(title);
                 for (const [key, value] of Object.entries(metadata)) {
-                    const displayValue = Array.isArray(value) ? value.join(', ') : value;
-                    html += '<div class="frontmatter-row">';
-                    html += '<span class="frontmatter-key">' + key + '</span>';
-                    html += '<span class="frontmatter-value">' + displayValue + '</span>';
-                    html += '</div>';
+                    const row = document.createElement('div');
+                    row.className = 'frontmatter-row';
+                    const keySpan = document.createElement('span');
+                    keySpan.className = 'frontmatter-key';
+                    keySpan.textContent = key;
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'frontmatter-value';
+                    valueSpan.textContent = Array.isArray(value) ? value.join(', ') : value;
+                    row.appendChild(keySpan);
+                    row.appendChild(valueSpan);
+                    box.appendChild(row);
                 }
-                html += '</div>';
-                return html;
+                return box;
             }
 
             // Raw markdown from Swift (JSON-encoded for safety)
@@ -238,14 +261,16 @@ class MarkdownService {
 
             // Extract front matter before processing
             const { yaml: yamlString, content: markdownContent } = extractFrontMatter(rawMarkdown);
-            const frontMatterHtml = yamlString ? renderFrontMatter(parseYaml(yamlString)) : '';
+            const frontMatterEl = yamlString ? renderFrontMatter(parseYaml(yamlString)) : null;
 
-            // Process: emoji replacement -> markdown parsing -> HTML
+            // Process: emoji replacement -> markdown parsing -> sanitise HTML
             const markdownWithEmoji = replaceEmoji(markdownContent);
-            const htmlContent = marked.parse(markdownWithEmoji);
+            const htmlContent = DOMPurify.sanitize(marked.parse(markdownWithEmoji));
 
-            // Insert front matter + content into container
-            document.getElementById('content').innerHTML = frontMatterHtml + htmlContent;
+            // Insert content into container
+            const contentEl = document.getElementById('content');
+            if (frontMatterEl) contentEl.appendChild(frontMatterEl);
+            contentEl.innerHTML += htmlContent;
 
             // Initialize syntax highlighting
             hljs.highlightAll();

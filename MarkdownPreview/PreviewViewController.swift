@@ -44,12 +44,12 @@ class PreviewViewController: NSViewController, QLPreviewingController {
             <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px;">
                 <div style="background: #ffebee; border: 2px solid #c62828; padding: 20px; border-radius: 8px;">
                     <h2>❌ Error Rendering Markdown</h2>
-                    <p><strong>Error:</strong> \(error.localizedDescription)</p>
-                    <p><strong>Bundle Path:</strong> \(Bundle(for: PreviewViewController.self).bundlePath)</p>
+                    <p><strong>Error:</strong> \(error.localizedDescription.escapedForHTML)</p>
+                    <p><strong>Bundle Path:</strong> \(Bundle(for: PreviewViewController.self).bundlePath.escapedForHTML)</p>
                 </div>
                 <div style="margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
                     <h3>Raw Content:</h3>
-                    <pre style="white-space: pre-wrap; word-wrap: break-word;">\(markdownString.prefix(1000))</pre>
+                    <pre style="white-space: pre-wrap; word-wrap: break-word;">\(String(markdownString.prefix(1000)).escapedForHTML)</pre>
                 </div>
             </body>
             </html>

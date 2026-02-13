@@ -7,6 +7,13 @@
   - Displays key-value pairs in Apple-styled metadata box
   - Supports inline arrays `[a, b, c]`
   - Does not affect TOC (uses div elements, not headings)
+- DOMPurify 3.3.1 (`purify.min.js`) for HTML sanitisation of rendered markdown output
+
+### Security
+- Fixed XSS in front matter rendering — switched from string concatenation to DOM API (`textContent`)
+- Fixed XSS in error fallback pages — added HTML escaping for raw markdown content
+- Sanitised `marked.parse()` output with `DOMPurify.sanitize()` (defense in depth)
+- Changed Mermaid.js `securityLevel` from `'loose'` to `'strict'` (disables click callbacks, prevents script injection)
 
 ### Changed
 - Enhanced `test-extension.sh` to accept optional file argument and `--list` flag
