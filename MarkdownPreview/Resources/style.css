@@ -476,6 +476,7 @@
           border: 1px solid var(--border-color);
           border-radius: var(--radius-lg);
           font-size: var(--font-size-sm);
+          overflow: hidden;
         }
 
         .frontmatter-title {
@@ -507,6 +508,9 @@
 
         .frontmatter-value {
           flex: 1;
+          min-width: 0;
+          overflow-wrap: break-word;
+          word-break: break-word;
           color: var(--text-primary);
         }
 
@@ -559,23 +563,14 @@
         ul.task-list,
         ul:has(> li > input[type="checkbox"]) {
           list-style: none;
-          padding-left: 0;
-        }
-
-        ul.contains-task-list li,
-        ul.task-list li,
-        li:has(> input[type="checkbox"]) {
-          padding-left: var(--spacing-lg);
-          position: relative;
+          padding-left: var(--spacing-md);
         }
 
         input[type="checkbox"] {
-          position: absolute;
-          left: 0;
-          top: 4px;
           width: 16px;
           height: 16px;
-          margin: 0;
+          margin: 0 var(--spacing-sm) 0 0;
+          vertical-align: middle;
           cursor: pointer;
           accent-color: var(--link-color);
         }

@@ -15,6 +15,10 @@
 - Sanitised `marked.parse()` output with `DOMPurify.sanitize()` (defense in depth)
 - Changed Mermaid.js `securityLevel` from `'loose'` to `'strict'` (disables click callbacks, prevents script injection)
 
+### Fixed
+- Task list checkboxes no longer detach to top-left corner in narrow Finder preview pane — replaced absolute positioning with inline flow
+- Front matter values no longer overflow box boundary at narrow widths — added word-break and min-width fix
+
 ### Changed
 - Enhanced `test-extension.sh` to accept optional file argument and `--list` flag
 - Mermaid.js now loads conditionally - 2.6MB library only included when document contains diagrams (89% JS reduction for non-diagram files)
