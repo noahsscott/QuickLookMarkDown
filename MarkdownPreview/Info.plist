@@ -11,7 +11,8 @@
 			<key>QLSupportedContentTypes</key>
 			<array>
 				<string>net.daringfireball.markdown</string>
-				<string>public.plain-text</string>
+				<string>public.markdown</string>
+				<string>com.unknown.md</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>
