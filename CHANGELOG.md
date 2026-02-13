@@ -19,6 +19,7 @@
 - Enhanced `test-extension.sh` to accept optional file argument and `--list` flag
 - Mermaid.js now loads conditionally - 2.6MB library only included when document contains diagrams (89% JS reduction for non-diagram files)
 - `QLSupportedContentTypes` narrowed from `public.plain-text` (all text files) to markdown-specific UTIs (`net.daringfireball.markdown`, `public.markdown`, `com.unknown.md`)
+- Bundle resources (CSS/JS) now cached after first load — eliminates redundant disk reads on subsequent previews
 
 ### Removed
 - Deleted unused `Resources.swift` (177 lines) - emoji dictionary was superseded by JavaScript implementation in v0.7.0

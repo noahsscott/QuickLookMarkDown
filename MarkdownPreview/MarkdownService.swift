@@ -18,6 +18,54 @@ extension String {
 
 class MarkdownService {
 
+    // Cached bundle resources — loaded once on first preview, reused thereafter
+    private struct CachedResources {
+        let css: String
+        let temmlCSS: String
+        let markedJS: String
+        let highlightJS: String
+        let purifyJS: String
+        let tocbotJS: String
+        let temmlJS: String
+        let mermaidJS: String?
+    }
+
+    private var cachedResources: CachedResources?
+
+    private func loadResources(from bundle: Bundle) throws -> CachedResources {
+        if let cached = cachedResources { return cached }
+
+        guard let cssURL = bundle.url(forResource: "style", withExtension: "css"),
+              let markedURL = bundle.url(forResource: "marked.min", withExtension: "js"),
+              let highlightURL = bundle.url(forResource: "highlight.min", withExtension: "js"),
+              let purifyURL = bundle.url(forResource: "purify.min", withExtension: "js"),
+              let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js"),
+              let temmlCSSURL = bundle.url(forResource: "Temml-Local", withExtension: "css"),
+              let temmlJSURL = bundle.url(forResource: "temml.min", withExtension: "js") else {
+            throw NSError(domain: "MarkdownService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unable to find CSS/JS resource files in bundle"])
+        }
+
+        let mermaidJS: String?
+        if let mermaidURL = bundle.url(forResource: "mermaid.min", withExtension: "js") {
+            mermaidJS = try String(contentsOf: mermaidURL, encoding: .utf8)
+        } else {
+            mermaidJS = nil
+        }
+
+        let resources = CachedResources(
+            css: try String(contentsOf: cssURL, encoding: .utf8),
+            temmlCSS: try String(contentsOf: temmlCSSURL, encoding: .utf8),
+            markedJS: try String(contentsOf: markedURL, encoding: .utf8),
+            highlightJS: try String(contentsOf: highlightURL, encoding: .utf8),
+            purifyJS: try String(contentsOf: purifyURL, encoding: .utf8),
+            tocbotJS: try String(contentsOf: tocbotURL, encoding: .utf8),
+            temmlJS: try String(contentsOf: temmlJSURL, encoding: .utf8),
+            mermaidJS: mermaidJS
+        )
+        cachedResources = resources
+        return resources
+    }
+
     func renderMarkdownToHTML(_ markdown: String, bundle: Bundle = Bundle.main) throws -> String {
         // Escape markdown for safe embedding in JavaScript
         // Using JSON encoding ensures proper escaping of quotes, newlines, backslashes, etc.
@@ -27,14 +75,11 @@ class MarkdownService {
         // Detect if document contains Mermaid diagrams (lazy load 2.6MB library only when needed)
         let hasMermaid = markdown.contains("```mermaid")
 
-        // Read CSS and JS resources from bundle
-        guard let cssURL = bundle.url(forResource: "style", withExtension: "css"),
-              let markedURL = bundle.url(forResource: "marked.min", withExtension: "js"),
-              let highlightURL = bundle.url(forResource: "highlight.min", withExtension: "js"),
-              let purifyURL = bundle.url(forResource: "purify.min", withExtension: "js"),
-              let tocbotURL = bundle.url(forResource: "tocbot.min", withExtension: "js"),
-              let temmlCSSURL = bundle.url(forResource: "Temml-Local", withExtension: "css"),
-              let temmlJSURL = bundle.url(forResource: "temml.min", withExtension: "js") else {
+        // Load resources (cached after first call)
+        let res: CachedResources
+        do {
+            res = try loadResources(from: bundle)
+        } catch {
             // Fallback: return unstyled HTML with error message if resources not found
             return """
             <!DOCTYPE html>
@@ -53,19 +98,10 @@ class MarkdownService {
             """
         }
 
-        let css = try String(contentsOf: cssURL, encoding: .utf8)
-        let markedJS = try String(contentsOf: markedURL, encoding: .utf8)
-        let highlightJS = try String(contentsOf: highlightURL, encoding: .utf8)
-        let purifyJS = try String(contentsOf: purifyURL, encoding: .utf8)
-        let tocbotJS = try String(contentsOf: tocbotURL, encoding: .utf8)
-        let temmlCSS = try String(contentsOf: temmlCSSURL, encoding: .utf8)
-        let temmlJS = try String(contentsOf: temmlJSURL, encoding: .utf8)
-
-        // Load Mermaid only if document contains diagrams (2.6MB library)
+        // Build Mermaid script only if document contains diagrams and library is available
         var mermaidScript = ""
         var mermaidInit = ""
-        if hasMermaid, let mermaidURL = bundle.url(forResource: "mermaid.min", withExtension: "js") {
-            let mermaidJS = try String(contentsOf: mermaidURL, encoding: .utf8)
+        if hasMermaid, let mermaidJS = res.mermaidJS {
             mermaidScript = "<script>\(mermaidJS)</script>"
             mermaidInit = """
 
@@ -104,10 +140,10 @@ class MarkdownService {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
             <style>
-            \(css)
+            \(res.css)
             </style>
             <style>
-            \(temmlCSS)
+            \(res.temmlCSS)
             </style>
         </head>
         <body class="preload">
@@ -129,13 +165,13 @@ class MarkdownService {
             <div class="markdown-body js-toc-content" id="content"></div>
 
             <script>
-            \(markedJS)
+            \(res.markedJS)
             </script>
             <script>
-            \(highlightJS)
+            \(res.highlightJS)
             </script>
             <script>
-            \(purifyJS)
+            \(res.purifyJS)
             </script>
         \(mermaidScript)
             <script>
@@ -277,10 +313,10 @@ class MarkdownService {
         \(mermaidInit)
             </script>
             <script>
-            \(tocbotJS)
+            \(res.tocbotJS)
             </script>
             <script>
-            \(temmlJS)
+            \(res.temmlJS)
             </script>
             <script>
             // Initialize Temml for math rendering
